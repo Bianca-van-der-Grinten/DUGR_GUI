@@ -76,6 +76,7 @@ class TrapezoidRoi:
 
         self.width_bottom = self.bottom_right[0] - self.bottom_left[0]
         self.width_top = self.top_right[0] - self.top_left[0]
+        self.width = max(self.bottom_right[0], self.top_right[0]) - min(self.bottom_left[0], self.top_left[0])
 
         self.x_anchor = min(self.top_left[0], self.top_right[0], self.bottom_right[0], self.bottom_left[0])
         self.y_anchor = min(self.top_left[1], self.top_right[1], self.bottom_right[1], self.bottom_left[1])
@@ -96,6 +97,7 @@ class TrapezoidRoi:
 
         self.height_left = self.bottom_left[1] - self.top_left[1]
         self.height_right = self.bottom_right[1] - self.top_right[1]
+        self.height = max(self.bottom_left[1], self.bottom_right[1]) - min(self.top_left[1], self.top_right[1])
 
         mean_height = (self.height_right + self.height_left)/2
 
