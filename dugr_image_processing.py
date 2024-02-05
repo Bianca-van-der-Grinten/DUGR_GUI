@@ -292,7 +292,7 @@ def execute_projective_dist_algorithm(src_image: np.ndarray, viewing_distance: f
     r_o = 5.0 / r_5deg
 
     fwhm = ro_min/r_o
-    sigma = fwhm / 2.3584
+    sigma = fwhm / 2.3548
     filter_width = 2 * ceil(3 * sigma) + 1
 
     #  Calculate Theta and Phi Image
