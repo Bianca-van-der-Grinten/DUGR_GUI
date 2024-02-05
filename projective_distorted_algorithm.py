@@ -742,6 +742,9 @@ class ProjectiveDistUi(QWidget):
         if len(self.rois) == 0:
             self.status_bar.showMessage("No ROI found! Make sure to safe a ROI before executing the calculation")
             return
+        if len(self.rois) >= 1:
+            self.status_bar.showMessage("Calculate DUGR")
+            self.status_bar.repaint(0, 0, -1, -1)
 
         self.DUGR_L, self.k_square_L, self.l_eff, self.l_s, self.solid_angle_eff, self.omega_l, \
             self.optical_resolution, self.rb_min, self.ro_min, self.fwhm, self.sigma, self.filter_width, \
@@ -753,6 +756,7 @@ class ProjectiveDistUi(QWidget):
                                                                     luminous_area_height=self.luminaire_height,
                                                                     viewing_angle=self.viewing_angle,
                                                                     rois=self.rois,
+                                                                    lum_th=self.lum_th,
                                                                     filter_flag=self.filter_only_roi_flag)
 
         self.A_eff = self.solid_angle_eff * self.viewing_distance**2

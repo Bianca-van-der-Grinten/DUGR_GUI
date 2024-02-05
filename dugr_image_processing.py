@@ -249,7 +249,8 @@ def check_point(x, y, p_x1, p_x2, p_y1, p_y2):
 
 def execute_projective_dist_algorithm(src_image: np.ndarray, viewing_distance: float, luminous_area_height: float,
                                       viewing_angle: float, focal_length: float, pixel_size: float, rois: list,
-                                      filter_flag: bool, d: int = 12, opt_x: int = None, opt_y: int = None):
+                                      lum_th: int, filter_flag: bool, d: int = 12, opt_x: int = None,
+                                      opt_y: int = None):
     """
     Function that executes the calculation of the DUGR value on a projective distorted image
 
@@ -262,6 +263,7 @@ def execute_projective_dist_algorithm(src_image: np.ndarray, viewing_distance: f
         focal_length: Focal length of the optical system used for the measurement
         pixel_size: Size of a pixel of the sensor of the optical system used for the measurement (Pixel Pitch)
         rois: Regions of interest (Regions containing luminous areas)
+        lum_th: Threshold for luminance
         filter_flag: When this flag is set to true, only the "Regions of Interest" are gaussian filtered
         d: Minimal feature diameter (Default = 12mm)
         opt_x: x coordinate of the optical axis
@@ -377,7 +379,7 @@ def execute_projective_dist_algorithm(src_image: np.ndarray, viewing_distance: f
 
         for i in range(filtered_image_roi.shape[0]):
             for j in range(filtered_image_roi.shape[1]):
-                if filtered_image_roi[i][j] >= 500:
+                if filtered_image_roi[i][j] >= lum_th:
                     binarized_img_roi[i][j] = filtered_image_roi[i][j]
                     if not filter_flag:
                         eff_solid_angle_values.append(omega[i][j])
@@ -482,6 +484,6 @@ def execute_projective_dist_algorithm(src_image: np.ndarray, viewing_distance: f
 
     # Calculate the DUGR value
     dugr = 8 * log(k_square, 10)
-
     return dugr, k_square, l_eff, l_s, omega_eff, omega_l, r_o, rb_min, ro_min, fwhm, sigma, filter_width,\
         filtered_img, binarized_img
+
