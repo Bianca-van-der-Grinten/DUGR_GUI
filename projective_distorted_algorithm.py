@@ -757,7 +757,8 @@ class ProjectiveDistUi(QWidget):
                                                                     viewing_angle=self.viewing_angle,
                                                                     rois=self.rois,
                                                                     lum_th=self.lum_th,
-                                                                    filter_flag=self.filter_only_roi_flag)
+                                                                    filter_flag=self.filter_only_roi_flag,
+                                                                    d=self.d)
 
         self.A_eff = self.solid_angle_eff * self.viewing_distance**2
         if self.roi_shape_flag != "Circular":
