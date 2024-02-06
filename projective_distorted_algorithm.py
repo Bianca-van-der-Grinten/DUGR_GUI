@@ -60,8 +60,7 @@ class ProjectiveDistUi(QWidget):
             'Canon EOS RP': 0.00573*2,
             'Custom Pixel Size': 0.0
         }
-        self.camera_list = ['LMK6', 'LMK5-5', 'LMK5-1', 'LMK98-4', 'Canon EOS 70d', 'Canon EOS 80d', 'Canon EOS 350d',
-                            'Canon EOS 450d', 'Canon EOS 550d', 'Canon EOS 650d', 'Canon EOS RP', 'Custom Pixel Size']
+        self.camera_list = list(self.pixel_size_dict.keys())
         self.lmk_mobile = False
 
         # Parameters
@@ -97,12 +96,7 @@ class ProjectiveDistUi(QWidget):
         self.click = [None, None]
         self.release = [None, None]
         self.poly_edge_points = np.zeros((4, 2), dtype="float32")
-        self.vertices = [
-            [None, None],
-            [None, None],
-            [None, None],
-            [None, None]
-        ]
+        self.vertices = [[None, None]] * 4
 
         self.logarithmic_scaling_flag = 'x4'
         self.vmin = 0
@@ -358,50 +352,32 @@ class ProjectiveDistUi(QWidget):
         if exists(image_path):
             if image_path[-2:] != 'pf' or image_path[-3:] != 'txt':
                 self.status_bar.showMessage('File type is invalid.\nMake sure to load a *.pf  or *.txt File')
-            if image_path[-2:] == 'pf':
+                return
+            elif image_path[-2:] == 'pf':
                 self.source_image, src_img_header = dugr_image_io.convert_tt_image_to_numpy_array(image_path)
-                try:
-                    self.vmin = np.max(self.source_image) / 10 ** int(self.logarithmic_scaling_flag[-1])
-                except ValueError:
-                    self.status_bar.showMessage('WARNING: The Image you want to load is in one of the supported file '
-                                                'types, but the pixel information is not readable. '
-                                                'Make sure the file is not corrupted')
-                    return
-
-                self.source_figure.figure.clf()
-                self._source_ax = self.source_figure.figure.subplots()
-                self.src_plot = self._source_ax.imshow(self.source_image,
-                                                       norm=LogNorm(vmin=self.vmin, vmax=np.max(self.source_image)),
-                                                       cmap=custom_colormap.ls_cmap)
-                self.source_figure.figure.colorbar(self.src_plot, ax=self._source_ax, fraction=0.04, pad=0.035,
-                                                   label="cd/m^2")
-                self.source_figure.draw()
-                self.shape_selector = PolygonSelector(ax=self._source_ax, onselect=self.on_poly_select, useblit=True,
-                                                      props=dict(color='white', linestyle='-', linewidth=2, alpha=0.5))
-                self.status_bar.showMessage('File import successful')
-
-            elif image_path[-3:] == "txt":
+            else:
                 self.source_image = dugr_image_io.convert_ascii_image_to_numpy_array(image_path)
-                try:
-                    self.vmin = np.max(self.source_image) / 10 ** int(self.logarithmic_scaling_flag[-1])
-                except ValueError:
-                    self.status_bar.showMessage('WARNING: The Image you want to load is in one of the supported file '
-                                                'types, but the pixel information is not readable. '
-                                                'Make sure the file is not corrupted')
+            try:
+                self.vmin = np.max(self.source_image) / 10 ** int(self.logarithmic_scaling_flag[-1])
+            except ValueError:
+                self.status_bar.showMessage('WARNING: The Image you want to load is in one of the supported file '
+                                            'types, but the pixel information is not readable. '
+                                            'Make sure the file is not corrupted')
+                return
 
-                self.source_figure.figure.clf()
-                self._source_ax = self.source_figure.figure.subplots()
-                self.src_plot = self._source_ax.imshow(self.source_image,
-                                                       norm=LogNorm(vmin=self.vmin, vmax=np.max(self.source_image)),
-                                                       cmap=custom_colormap.ls_cmap)
-                self.source_figure.figure.colorbar(self.src_plot, ax=self._source_ax, fraction=0.04, pad=0.035,
-                                                   label="cd/m^2")
-                self.source_figure.draw()
-                self.shape_selector = PolygonSelector(ax=self._source_ax, onselect=self.on_poly_select, useblit=True,
-                                                      props=dict(color='white', linestyle='-', linewidth=2, alpha=0.5))
-                self.status_bar.showMessage('File import successful')
+            self.source_figure.figure.clf()
+            self._source_ax = self.source_figure.figure.subplots()
+            self.src_plot = self._source_ax.imshow(self.source_image,
+                                                   norm=LogNorm(vmin=self.vmin, vmax=np.max(self.source_image)),
+                                                   cmap=custom_colormap.ls_cmap)
+            self.source_figure.figure.colorbar(self.src_plot, ax=self._source_ax, fraction=0.04, pad=0.035,
+                                               label="cd/m^2")
+            self.source_figure.draw()
+            self.shape_selector = PolygonSelector(ax=self._source_ax, onselect=self.on_poly_select, useblit=True,
+                                                  props=dict(color='white', linestyle='-', linewidth=2, alpha=0.5))
+            self.status_bar.showMessage('File import successful')
         else:
-            self.status_bar.showMessage('No File selected')
+            self.status_bar.showMessage('No file selected')
 
     def on_load_parameter_click(self):
         parameter_path = QFileDialog.getOpenFileName(self, "Choose file")[0]
@@ -763,16 +739,14 @@ class ProjectiveDistUi(QWidget):
         self.A_eff = self.solid_angle_eff * self.viewing_distance**2
         if self.roi_shape_flag != "Circular":
             self.A = self.luminaire_width * self.luminaire_height
-            self.A_p = self.A * np.cos(np.radians(90 - self.viewing_angle))
         else:
             self.A = np.pi * (self.luminaire_height/2) * (self.luminaire_width/2)
-            self.A_p = self.A * np.cos(np.radians(90 - self.viewing_angle))
+        self.A_p = self.A * np.cos(np.radians(90 - self.viewing_angle))
 
         self.A_p_new_I = (self.luminous_intensity ** 2) / ((self.l_eff * 10 ** -6) ** 2 * self.A_eff)
         self.A_p_new_L = self.A_p / self.k_square_L
 
         self.A_new_L = self.A_p_new_L / np.cos(np.radians(90 - self.viewing_angle))
-
 
         if self.A_p_new_I != 0:
             self.k_square_I = self.A_p / self.A_p_new_I

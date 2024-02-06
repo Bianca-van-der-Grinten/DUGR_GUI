@@ -10,6 +10,7 @@ import numpy as np
 
 class RectangularRoi:
     def __init__(self, roi_array, roi_coordinates):
+        self.bounding_box = roi_array
         self.roi_array = roi_array
         self.roi_coordinates = roi_coordinates
         self.top_left = (roi_coordinates[0][0], roi_coordinates[0][1])
