@@ -660,97 +660,64 @@ class ProjectiveDistUi(QWidget):
 
         self.A_new_L = self.A_p_new_L / np.cos(np.radians(90 - self.viewing_angle))
 
+        table_data = []
+        data = {'Parameter': [],
+                'Value': [],
+                'Unit': []}
         if self.A_p_new_I != 0:
             self.k_square_I = self.A_p / self.A_p_new_I
             self.DUGR_I = 8 * log(self.k_square_I, 10)
 
-            table_data = [
+            table_data.extend([
                 ["DUGR_I", f"{self.DUGR_I:.1f}"],
                 ["k^2_I", f"{self.k_square_I:.1f}"],
                 ["A_p_new_I", f"{self.A_p_new_I:.0f} [mm^2]"],
-                ["DUGR_L", f"{self.DUGR_L:.1f}"],
-                ["k^2_L", f"{self.k_square_L:.1f}"],
-                ["A_p_new_L", f"{self.A_p_new_L:.0f} [mm^2]"],
-                ["A_p", f"{self.A_p:.0f} [mm^2]"],
-                ["A_new_L", f"{self.A_new_L:.0f} [mm^2]"],
-                ["A", f"{self.A:.0f} [mm^2]"],
-                ["A_eff", f"{self.A_eff:.0f} [mm^2]"],
-                ["L_eff", f"{self.l_eff:.2f} [cd/m^2]"],
-                ["L_mean", f"{self.l_s:.2f} [cd/m^2]"],
-                ["\u03C9_eff", f"{self.solid_angle_eff:.6f} [sr]"],
-                ["\u03C9_luminaire", f"{self.omega_l:.6f} [sr]"],
-                ["Measurement angle \u03B1E", f"{self.viewing_angle} [°]"],
-                ["Measurement distance", f"{self.viewing_distance} [mm]"],
-                ["Luminous area width", f"{self.luminaire_width} [mm]"],
-                ["Luminous area height", f"{self.luminaire_height} [mm]"],
-                ["I", f"{self.luminous_intensity:.1f} [cd]"],
-                ["lum_th", f"{self.lum_th} [cd/m^2]"],
-                ["d", f"{self.d} [mm]"],
-                ["Calculated optical resolution", f"{self.optical_resolution:.5f} [°/px]"],
-                ["FWHM", f"{self.fwhm:.2f} [px]"],
-                ["Filter width", f"{self.filter_width} [px]"],
-                ["Filter sigma", f"{self.sigma:.3f} [px]"],
-                ["rb min", f"{self.rb_min:.2f} [mm]"],
-                ["ro min", f"{self.ro_min:.5f} [°/px]"]
-            ]
+                ["I", f"{self.luminous_intensity:.1f} [cd]"]
+            ])
 
-            data = {'Parameter': ['DUGR_I', 'k^2_I', 'A_p_new_I', 'DUGR_L', 'k^2_L', 'A_p_new_L', 'A_p', 'A_new_L', 'A',
-                                  'A_eff', 'L_eff', 'L_mean', '\u03C9_eff', '\u03C9_luminaire',
-                                  'Measurement angle \u03B1E', 'Measurement distance', 'Luminous area width',
-                                  'Luminous area height', 'I', 'lum_th', 'd', 'Calculated optical resolution', 'FWHM',
-                                  'Filter_width', 'Filter \u03C3', 'rb_min', 'ro_min'],
-                    'Value': [self.DUGR_I, self.k_square_I, self.A_p_new_I, self.DUGR_L, self.k_square_L,
-                              self.A_p_new_L, self.A_p, self.A_new_L, self.A, self.A_eff, self.l_eff, self.l_s,
-                              self.solid_angle_eff, self.omega_l, self.viewing_angle, self.viewing_distance,
-                              self.luminaire_width, self.luminaire_height, self.luminous_intensity, self.lum_th, self.d,
-                              self.optical_resolution, self.fwhm, self.filter_width, self.sigma, self.rb_min,
-                              self.ro_min],
-                    'Unit': ['None', 'None', 'mm^2', 'None', 'None', 'mm^2', 'mm^2', 'mm^2', 'mm^2', 'mm^2', 'cd/m^2',
-                             'cd/m^2', 'sr', 'sr', '°', 'mm', 'mm', 'mm', 'cd', 'cd/m^2', 'mm', '°/px', 'px', 'px',
-                             'px', 'mm', '°/px']}
+            data['Parameter'].extend(['DUGR_I', 'k^2_I', 'A_p_new_I', 'I'])
+            data['Value'].extend([self.DUGR_I, self.k_square_I, self.A_p_new_I, self.luminous_intensity])
+            data['Unit'].extend(['None', 'None', 'mm^2', 'cd'])
+        table_data.extend([
+            ["DUGR_L", f"{self.DUGR_L:.1f}"],
+            ["k^2_L", f"{self.k_square_L:.1f}"],
+            ["A_p_new_L", f"{self.A_p_new_L:.0f} [mm^2]"],
+            ["A_p", f"{self.A_p:.0f} [mm^2]"],
+            ["A_new_L", f"{self.A_new_L:.0f} [mm^2]"],
+            ["A", f"{self.A:.0f} [mm^2]"],
+            ["A_eff", f"{self.A_eff:.0f} [mm^2]"],
+            ["Effective luminance (L_eff)", f"{self.l_eff:.2f} [cd/m^2]"],
+            ["Mean Luminaire luminance (L_mean)", f"{self.l_s:.2f} [cd/m^2]"],
+            ["Effective solid angle (\u03C9_eff)", f"{self.solid_angle_eff:.6f} [sr]"],
+            ["Luminaire solid angle (\u03C9_luminaire)", f"{self.omega_l:.6f} [sr]"],
+            ["Measurement angle \u03B1E", f"{self.viewing_angle} [°]"],
+            ["Viewing distance", f"{self.viewing_distance} [mm]"],
+            ["Luminous area width", f"{self.luminaire_width} [mm]"],
+            ["Luminous area height", f"{self.luminaire_height} [mm]"],
+            ["lum_th", f"{self.lum_th} [cd/m^2]"],
+            ["d", f"{self.d} [mm]"],
+            ["Calculated optical resolution", f"{self.optical_resolution:.5f} [°/px]"],
+            ["FWHM", f"{self.fwhm:.2f} [px]"],
+            ["Filter width", f"{self.filter_width} [px]"],
+            ["Filter sigma", f"{self.sigma:.3f} [px]"],
+            ["rb min", f"{self.rb_min:.2f} [mm]"],
+            ["ro min", f"{self.ro_min:.5f} [°/px]"]
+        ])
 
-            self.df = pd.DataFrame(data)
-        else:
-            table_data = [
-                ["DUGR_L", f"{self.DUGR_L:.1f}"],
-                ["k^2_L", f"{self.k_square_L:.1f}"],
-                ["A_p_new_L", f"{self.A_p_new_L:.0f} [mm^2]"],
-                ["A_p", f"{self.A_p:.0f} [mm^2]"],
-                ["A_new_L", f"{self.A_new_L:.0f} [mm^2]"],
-                ["A", f"{self.A:.0f} [mm^2]"],
-                ["A_eff", f"{self.A_eff:.0f} [mm^2]"],
-                ["Effective luminance", f"{self.l_eff:.2f} [cd/m^2]"],
-                ["Mean Luminaire luminance", f"{self.l_s:.2f} [cd/m^2]"],
-                ["Effective solid angle", f"{self.solid_angle_eff:.6f} [sr]"],
-                ["Luminaire solid angle", f"{self.omega_l:.6f} [sr]"],
-                ["Measurement angle \u03B1E", f"{self.viewing_angle} [°]"],
-                ["Viewing distance", f"{self.viewing_distance} [mm]"],
-                ["Luminous area width", f"{self.luminaire_width} [mm]"],
-                ["Luminous area height", f"{self.luminaire_height} [mm]"],
-                ["lum_th", f"{self.lum_th} [cd/m^2]"],
-                ["d", f"{self.d} [mm]"],
-                ["Calculated optical resolution", f"{self.optical_resolution:.5f} [°/px]"],
-                ["FWHM", f"{self.fwhm:.2f} [px]"],
-                ["Filter width", f"{self.filter_width} [px]"],
-                ["Filter sigma", f"{self.sigma:.3f} [px]"],
-                ["rb min", f"{self.rb_min:.2f} [mm]"],
-                ["ro min", f"{self.ro_min:.5f} [°/px]"]
-            ]
-
-            data = {'Parameter': ['DUGR_L', 'k^2_L', 'A_p_new_L', 'A_p', 'A_new_L', 'A', 'A_eff', 'L_eff', 'L_mean',
+        data['Parameter'].extend(['DUGR_L', 'k^2_L', 'A_p_new_L', 'A_p', 'A_new_L', 'A', 'A_eff', 'L_eff', 'L_mean',
                                   '\u03C9_eff', '\u03C9_luminaire', 'Measurement angle \u03B1E', 'Measurement distance',
                                   'Luminous area width', 'Luminous area height', 'lum_th', 'd',
                                   'Calculated optical resolution', 'FWHM', 'Filter_width', 'Filter \u03C3', 'rb_min',
-                                  'ro_min'],
-                    'Value': [self.DUGR_L, self.k_square_L, self.A_p_new_L, self.A_p, self.A_new_L, self.A, self.A_eff,
+                                  'ro_min'])
+        data['Value'].extend([self.DUGR_L, self.k_square_L, self.A_p_new_L, self.A_p, self.A_new_L, self.A, self.A_eff,
                               self.l_eff, self.l_s, self.solid_angle_eff, self.omega_l, self.viewing_angle,
                               self.viewing_distance, self.luminaire_width, self.luminaire_height, self.lum_th, self.d,
                               self.optical_resolution, self.fwhm, self.filter_width, self.sigma, self.rb_min,
-                              self.ro_min],
-                    'Unit': ['None', 'None', 'mm^2', 'mm^2', 'mm^2', 'mm^2', 'mm^2', 'cd/m^2', 'cd/m^2', 'sr', 'sr',
-                             '°', 'mm', 'mm', 'mm', 'cd/m^2', 'mm', '°/px', 'px', 'px', 'px', 'mm', '°/px']}
+                              self.ro_min])
+        data['Unit'].extend(['None', 'None', 'mm^2', 'mm^2', 'mm^2', 'mm^2', 'mm^2', 'cd/m^2', 'cd/m^2', 'sr', 'sr',
+                             '°', 'mm', 'mm', 'mm', 'cd/m^2', 'mm', '°/px', 'px', 'px', 'px', 'mm', '°/px'])
 
-            self.df = pd.DataFrame(data)
+        self.df = pd.DataFrame(data)
 
         self.filtered_image_figure.figure.clf()
         self._filtered_image_ax = self.filtered_image_figure.figure.subplots(len(self.filtered_image))
