@@ -350,7 +350,7 @@ class ProjectiveDistUi(QWidget):
         image_path = QFileDialog.getOpenFileName(self, "Choose file")[0]
 
         if exists(image_path):
-            if image_path[-2:] != 'pf' or image_path[-3:] != 'txt':
+            if image_path[-2:] != 'pf' and image_path[-3:] != 'txt':
                 self.status_bar.showMessage('File type is invalid.\nMake sure to load a *.pf  or *.txt File')
                 return
             elif image_path[-2:] == 'pf':
