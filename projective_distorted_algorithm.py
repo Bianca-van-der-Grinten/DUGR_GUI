@@ -471,6 +471,52 @@ class ProjectiveDistUi(QWidget):
             self.shape_selector = PolygonSelector(ax=self._source_ax, onselect=self.on_poly_select, useblit=True,
                                                   props=dict(color='white', linestyle='-', linewidth=2, alpha=0.5))
 
+    def update_roi_plot(self):
+        self.roi_figure.figure.clf()
+
+        if len(self.rois) == 1:
+            self._roi_axs = self.roi_figure.figure.subplots()
+            roi_plot = self._roi_axs.imshow(self.rois[0].bounding_box,
+                                            norm=LogNorm(vmin=self.vmin, vmax=np.max(self.source_image)),
+                                            cmap=custom_colormap.ls_cmap)
+            if isinstance(self.rois[0], CircularRoi):
+                t = np.linspace(0, 2 * pi, 100)
+                self._roi_axs.plot(self.rois[0].width / 2 - 0.5 + self.rois[0].width / 2 * np.cos(t),
+                                   self.rois[0].height / 2 - 0.5 + self.rois[0].height / 2 * np.sin(t),
+                                   color='red')
+
+            elif isinstance(self.rois[0], TrapezoidRoi):
+                self._roi_axs.plot(self.rois[0].d1_x, self.rois[0].d1_y, color='red', linewidth=3)
+                self._roi_axs.plot(self.rois[0].d2_x, self.rois[0].d2_y, color='red', linewidth=3)
+                self._roi_axs.plot(self.rois[0].d3_x, self.rois[0].d3_y, color='red', linewidth=3)
+                self._roi_axs.plot(self.rois[0].d4_x, self.rois[0].d4_y, color='red', linewidth=3)
+
+            self.roi_figure.figure.colorbar(roi_plot, ax=self._roi_axs, fraction=0.04, pad=0.035,
+                                            label="cd/m^2")
+
+        elif len(self.rois) > 1:
+            self._roi_axs = self.roi_figure.figure.subplots(len(self.rois))
+            for i in range(len(self.rois)):
+                roi_plot = self._roi_axs[i].imshow(self.rois[i].bounding_box,
+                                                   norm=LogNorm(vmin=self.vmin, vmax=np.max(self.source_image)),
+                                                   cmap=custom_colormap.ls_cmap)
+                if isinstance(self.rois[i], CircularRoi):
+                    t = np.linspace(0, 2 * pi, 100)
+                    self._roi_axs[i].plot(self.rois[i].width / 2 - 0.5 + self.rois[i].width / 2 * np.cos(t),
+                                       self.rois[i].height / 2 - 0.5 + self.rois[i].height / 2 * np.sin(t),
+                                       color='red')
+
+                elif isinstance(self.rois[i], TrapezoidRoi):
+                    self._roi_axs[i].plot(self.rois[i].d1_x, self.rois[i].d1_y, color='red', linewidth=3)
+                    self._roi_axs[i].plot(self.rois[i].d2_x, self.rois[i].d2_y, color='red', linewidth=3)
+                    self._roi_axs[i].plot(self.rois[i].d3_x, self.rois[i].d3_y, color='red', linewidth=3)
+                    self._roi_axs[i].plot(self.rois[i].d4_x, self.rois[i].d4_y, color='red', linewidth=3)
+
+                self.roi_figure.figure.colorbar(roi_plot, ax=self._roi_axs[i], fraction=0.04, pad=0.035,
+                                                label="cd/m^2")
+
+        self.roi_figure.draw()
+
     def on_safe_roi_click(self):
         if not hasattr(self, 'source_image'):
             self.status_bar.showMessage('In order to safe ROIs you need to open a source image first!')
@@ -478,7 +524,7 @@ class ProjectiveDistUi(QWidget):
         if isinstance(self.shape_selector, PolygonSelector) and not np.any(self.vertices):
             self.status_bar.showMessage('In order to safe ROIs you need to draw them on the source image first!')
             return
-        if (isinstance(self.shape_selector, EllipseSelector) or isinstance(self.shape_selector, RectangleSelector))\
+        if (isinstance(self.shape_selector, EllipseSelector) or isinstance(self.shape_selector, RectangleSelector)) \
                 and self.click == [None, None]:
             self.status_bar.showMessage('In order to safe ROIs you need to draw them on the source image first!')
             return
@@ -498,142 +544,21 @@ class ProjectiveDistUi(QWidget):
 
         self.rois.append(ROI)
 
+        self.update_roi_plot()
+
         if len(self.rois) == 1:
-            if isinstance(self.rois[0], RectangularRoi):
-                self._roi_axs = self.roi_figure.figure.subplots()
-                roi_plot = self._roi_axs.imshow(self.rois[0].roi_array,
-                                                norm=LogNorm(vmin=self.vmin, vmax=np.max(self.source_image)),
-                                                cmap=custom_colormap.ls_cmap)
-                self.roi_figure.figure.colorbar(roi_plot, ax=self._roi_axs, fraction=0.04, pad=0.035,
-                                                label="cd/m^2")
-
-            elif isinstance(self.rois[0], CircularRoi):
-                self._roi_axs = self.roi_figure.figure.subplots()
-
-                roi_plot = self._roi_axs.imshow(self.rois[0].bounding_box,
-                                                norm=LogNorm(vmin=self.vmin, vmax=np.max(self.source_image)),
-                                                cmap=custom_colormap.ls_cmap)
-                self.roi_figure.figure.colorbar(roi_plot, ax=self._roi_axs, fraction=0.04, pad=0.035,
-                                                label="cd/m^2")
-
-                t = np.linspace(0, 2 * pi, 100)
-                self._roi_axs.plot(self.rois[0].width / 2 - 0.5 + self.rois[0].width / 2 * np.cos(t),
-                                   self.rois[0].height / 2 - 0.5 + self.rois[0].height / 2 * np.sin(t),
-                                   color='red')
-
-            elif isinstance(self.rois[0], TrapezoidRoi):
-                self._roi_axs = self.roi_figure.figure.subplots()
-                self._roi_axs.plot(self.rois[0].d1_x, self.rois[0].d1_y, color='red', linewidth=3)
-                self._roi_axs.plot(self.rois[0].d2_x, self.rois[0].d2_y, color='red', linewidth=3)
-                self._roi_axs.plot(self.rois[0].d3_x, self.rois[0].d3_y, color='red', linewidth=3)
-                self._roi_axs.plot(self.rois[0].d4_x, self.rois[0].d4_y, color='red', linewidth=3)
-                roi_plot = self._roi_axs.imshow(self.rois[0].bounding_box,
-                                                norm=LogNorm(vmin=self.vmin, vmax=np.max(self.source_image)),
-                                                cmap=custom_colormap.ls_cmap)
-                self.roi_figure.figure.colorbar(roi_plot, ax=self._roi_axs, fraction=0.04, pad=0.035,
-                                                label="cd/m^2")
-
             self.status_bar.showMessage("Successfully saved: 1 ROI")
-
         elif len(self.rois) > 1:
-
-            self.roi_figure.figure.clf()
-
-            self._roi_axs = self.roi_figure.figure.subplots(len(self.rois))
-            for i in range(len(self.rois)):
-                if isinstance(self.rois[i], RectangularRoi):
-                    roi_plot = self._roi_axs[i].imshow(self.rois[i].roi_array,
-                                                       norm=LogNorm(vmin=self.vmin, vmax=np.max(self.source_image)),
-                                                       cmap=custom_colormap.ls_cmap)
-                    self.roi_figure.figure.colorbar(roi_plot, ax=self._roi_axs[i], fraction=0.04, pad=0.035,
-                                                    label="cd/m^2")
-
-                elif isinstance(self.rois[i], CircularRoi):
-                    roi_plot = self._roi_axs[i].imshow(self.rois[i].bounding_box,
-                                                       norm=LogNorm(vmin=self.vmin, vmax=np.max(self.source_image)),
-                                                       cmap=custom_colormap.ls_cmap)
-                    self.roi_figure.figure.colorbar(roi_plot, ax=self._roi_axs[i], fraction=0.04, pad=0.035,
-                                                    label="cd/m^2")
-
-                    t = np.linspace(0, 2 * pi, 100)
-                    self._roi_axs[i].plot(self.rois[i].width / 2 - 0.5 + self.rois[i].width / 2 * np.cos(t),
-                                       self.rois[i].height / 2 - 0.5 + self.rois[i].height / 2 * np.sin(t),
-                                       color='red')
-
-                elif isinstance(self.rois[i], TrapezoidRoi):
-                    roi_plot = self._roi_axs[i].imshow(self.rois[i].bounding_box,
-                                                       norm=LogNorm(vmin=self.vmin, vmax=np.max(self.source_image)),
-                                                       cmap=custom_colormap.ls_cmap)
-                    self.roi_figure.figure.colorbar(roi_plot, ax=self._roi_axs[i], fraction=0.04, pad=0.035,
-                                                    label="cd/m^2")
-
             self.status_bar.showMessage("Successfully saved: " + str(len(self.rois)) + " ROIs")
         else:
             self.status_bar.showMessage("No ROI to safe selected")
-        self.roi_figure.draw()
 
     def on_delete_last_roi(self):
         if len(self.rois) > 0:
             self.rois.pop()
-            self.roi_figure.figure.clf()
 
-            if len(self.rois) == 1:
-                if isinstance(self.rois[0], RectangularRoi):
-                    self._roi_axs = self.roi_figure.figure.subplots()
-                    roi_plot = self._roi_axs.imshow(self.rois[0].roi_array,
-                                                    norm=LogNorm(vmin=self.vmin, vmax=np.max(self.source_image)),
-                                                    cmap=custom_colormap.ls_cmap)
-                    self.roi_figure.figure.colorbar(roi_plot, ax=self._roi_axs, fraction=0.04, pad=0.035,
-                                                    label="cd/m^2")
+            self.update_roi_plot()
 
-                elif isinstance(self.rois[0], CircularRoi):
-                    self._roi_axs = self.roi_figure.figure.subplots()
-                    roi_plot = self._roi_axs.imshow(self.rois[0].bounding_box,
-                                                    norm=LogNorm(vmin=self.vmin, vmax=np.max(self.source_image)),
-                                                    cmap=custom_colormap.ls_cmap)
-                    self.roi_figure.figure.colorbar(roi_plot, ax=self._roi_axs, fraction=0.04, pad=0.035,
-                                                    label="cd/m^2")
-
-                    t = np.linspace(0, 2 * pi, 100)
-                    self._roi_axs.plot(self.rois[0].width / 2 - 0.5 + self.rois[0].width / 2 * np.cos(t),
-                                       self.rois[0].height / 2 - 0.5 + self.rois[0].height / 2 * np.sin(t),
-                                       color='red')
-
-                elif isinstance(self.rois[0], TrapezoidRoi):
-                    self._roi_axs = self.roi_figure.figure.subplots()
-                    roi_plot = self._roi_axs.imshow(self.rois[0].bounding_box,
-                                                    norm=LogNorm(vmin=self.vmin, vmax=np.max(self.source_image)),
-                                                    cmap=custom_colormap.ls_cmap)
-                    self.roi_figure.figure.colorbar(roi_plot, ax=self._roi_axs, fraction=0.04, pad=0.035,
-                                                    label="cd/m^2")
-
-            if len(self.rois) > 1:
-                self._roi_axs = self.roi_figure.figure.subplots(len(self.rois))
-                for i in range(len(self.rois)):
-                    if isinstance(self.rois[i], RectangularRoi):
-                        roi_plot = self._roi_axs[i].imshow(self.rois[i].roi_array,
-                                                           norm=LogNorm(vmin=self.vmin, vmax=np.max(self.source_image)),
-                                                           cmap=custom_colormap.ls_cmap)
-                        self.roi_figure.figure.colorbar(roi_plot, ax=self._roi_axs[i], fraction=0.04, pad=0.035,
-                                                        label="cd/m^2")
-                    elif isinstance(self.rois[i], CircularRoi):
-                        roi_plot = self._roi_axs[i].imshow(self.rois[i].bounding_box,
-                                                           norm=LogNorm(vmin=self.vmin, vmax=np.max(self.source_image)),
-                                                           cmap=custom_colormap.ls_cmap)
-                        self.roi_figure.figure.colorbar(roi_plot, ax=self._roi_axs[i], fraction=0.04, pad=0.035,
-                                                        label="cd/m^2")
-
-                        t = np.linspace(0, 2 * pi, 100)
-                        self._roi_axs[i].plot(self.rois[i].width / 2 - 0.5 + self.rois[i].width / 2 * np.cos(t),
-                                              self.rois[i].height / 2 - 0.5 + self.rois[i].height / 2 * np.sin(t),
-                                              color='red')
-                    elif isinstance(self.rois[i], TrapezoidRoi):
-                        roi_plot = self._roi_axs[i].imshow(self.rois[i].bounding_box,
-                                                           norm=LogNorm(vmin=self.vmin, vmax=np.max(self.source_image)),
-                                                           cmap=custom_colormap.ls_cmap)
-                        self.roi_figure.figure.colorbar(roi_plot, ax=self._roi_axs[i], fraction=0.04, pad=0.035,
-                                                        label="cd/m^2")
-            self.roi_figure.draw()
             self.status_bar.showMessage("Successfully deleted the last ROI.     " + str(len(self.rois)) + " remaining")
         else:
             self.status_bar.showMessage("All of the ROIs have already been removed, none left.")
