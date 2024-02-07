@@ -293,7 +293,7 @@ def execute_projective_dist_algorithm(src_image: np.ndarray, viewing_distance: f
     r_5deg = (tan(radians(5.0)) * focal_length)/pixel_size
     r_o = 5.0 / r_5deg
 
-    fwhm = ro_min/r_o
+    fwhm = ro_min/r_o * 10
     sigma = fwhm / 2.3548
     filter_width = 2 * ceil(3 * sigma) + 1
 
