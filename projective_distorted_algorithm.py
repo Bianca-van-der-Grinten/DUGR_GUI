@@ -108,7 +108,6 @@ class ProjectiveDistUi(QWidget):
 
         self.source_image = None
         self.src_plot = None
-        self._roi_axs = None
         self._filtered_image_ax = None
         self.filtered_image_plot = None
         self._binarized_image_ax = None
@@ -494,13 +493,12 @@ class ProjectiveDistUi(QWidget):
     def update_roi_plot(self):
         self.roi_figure.figure.clf()
 
+        roi_axs = self.roi_figure.figure.subplots(len(self.rois))
         if len(self.rois) == 1:
-            self._roi_axs = self.roi_figure.figure.subplots()
-            self.plot_roi(self._roi_axs, self.rois[0])
+            self.plot_roi(roi_axs, self.rois[0])
         elif len(self.rois) > 1:
-            self._roi_axs = self.roi_figure.figure.subplots(len(self.rois))
             for i in range(len(self.rois)):
-                self.plot_roi(self._roi_axs[i], self.rois[i])
+                self.plot_roi(roi_axs[i], self.rois[i])
 
         self.roi_figure.draw()
 
