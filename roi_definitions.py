@@ -21,6 +21,18 @@ class RectangularRoi:
         self.width = self.top_right[0] - self.top_left[0]
         self.height = self.bottom_right[1] - self.top_right[1]
 
+        self.x_anchor = min(self.top_left[0], self.top_right[0], self.bottom_right[0], self.bottom_left[0])
+        self.y_anchor = min(self.top_left[1], self.top_right[1], self.bottom_right[1], self.bottom_left[1])
+
+        self.d1_x = np.array([self.top_left[0], self.top_right[0]]) - self.x_anchor
+        self.d1_y = np.array([self.top_left[1], self.top_right[1]]) - self.y_anchor
+        self.d2_x = np.array([self.top_right[0], self.bottom_right[0]]) - self.x_anchor
+        self.d2_y = np.array([self.top_right[1], self.bottom_right[1]]) - self.y_anchor
+        self.d3_x = np.array([self.bottom_right[0], self.bottom_left[0]]) - self.x_anchor
+        self.d3_y = np.array([self.bottom_right[1], self.bottom_left[1]]) - self.y_anchor
+        self.d4_x = np.array([self.bottom_left[0], self.top_left[0]]) - self.x_anchor
+        self.d4_y = np.array([self.bottom_left[1], self.top_left[1]]) - self.y_anchor
+
         self.area = self.width * self.height
         self.mean_luminance = np.mean(roi_array)
 
@@ -82,14 +94,14 @@ class TrapezoidRoi:
         self.x_anchor = min(self.top_left[0], self.top_right[0], self.bottom_right[0], self.bottom_left[0])
         self.y_anchor = min(self.top_left[1], self.top_right[1], self.bottom_right[1], self.bottom_left[1])
 
-        self.d1_x = [self.top_left[0] - self.x_anchor, self.top_right[0] - self.x_anchor]
-        self.d1_y = [self.top_left[1] - self.y_anchor, self.top_right[1] - self.y_anchor]
-        self.d2_x = [self.top_right[0] - self.x_anchor, self.bottom_right[0] - self.x_anchor]
-        self.d2_y = [self.top_right[1] - self.y_anchor, self.bottom_right[1] - self.y_anchor]
-        self.d3_x = [self.bottom_right[0] - self.x_anchor, self.bottom_left[0] - self.x_anchor]
-        self.d3_y = [self.bottom_right[1] - self.y_anchor, self.bottom_left[1] - self.y_anchor]
-        self.d4_x = [self.bottom_left[0] - self.x_anchor, self.top_left[0] - self.x_anchor]
-        self.d4_y = [self.bottom_left[1] - self.y_anchor, self.top_left[1] - self.y_anchor]
+        self.d1_x = np.array([self.top_left[0], self.top_right[0]]) - self.x_anchor
+        self.d1_y = np.array([self.top_left[1], self.top_right[1]]) - self.y_anchor
+        self.d2_x = np.array([self.top_right[0], self.bottom_right[0]]) - self.x_anchor
+        self.d2_y = np.array([self.top_right[1], self.bottom_right[1]]) - self.y_anchor
+        self.d3_x = np.array([self.bottom_right[0], self.bottom_left[0]]) - self.x_anchor
+        self.d3_y = np.array([self.bottom_right[1], self.bottom_left[1]]) - self.y_anchor
+        self.d4_x = np.array([self.bottom_left[0], self.top_left[0]]) - self.x_anchor
+        self.d4_y = np.array([self.bottom_left[1], self.top_left[1]]) - self.y_anchor
 
         self.bounding_box = src_image[int(min(self.top_left[1], self.top_right[1])):int(max(self.bottom_left[1],
                                                                                             self.bottom_right[1])),

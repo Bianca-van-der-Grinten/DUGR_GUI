@@ -108,13 +108,9 @@ class ProjectiveDistUi(QWidget):
 
         self.source_image = None
         self.src_plot = None
-        self._filtered_image_ax = None
-        self.filtered_image_plot = None
-        self._binarized_image_ax = None
         self._result_ax = None
         self.result_table = None
 
-        self.binarized_image_plot = None
         self.filtered_image = None
         self.binarized_image = None
 
@@ -624,6 +620,40 @@ class ProjectiveDistUi(QWidget):
         except ValueError:
             self.status_bar.showMessage("Userinput to float conversion not possible")
 
+    def plot_image_with_roi(self, axis, image, roi):
+        roi_plot = axis.imshow(image,
+                               norm=LogNorm(vmin=self.vmin, vmax=np.max(self.source_image)),
+                               cmap=custom_colormap.ls_cmap)
+
+        offset = ceil(self.filter_width / 2)
+
+        if isinstance(roi, CircularRoi):
+            t = np.linspace(0, 2 * pi, 100)
+            axis.plot(roi.width / 2 + offset + roi.width / 2 * np.cos(t),
+                      roi.height / 2 + offset + roi.height / 2 * np.sin(t),
+                      color='red', linewidth=3)
+
+        else:
+            axis.plot(roi.d1_x + offset, roi.d1_y + offset, color='red', linewidth=3)
+            axis.plot(roi.d2_x + offset, roi.d2_y + offset, color='red', linewidth=3)
+            axis.plot(roi.d3_x + offset, roi.d3_y + offset, color='red', linewidth=3)
+            axis.plot(roi.d4_x + offset, roi.d4_y + offset, color='red', linewidth=3)
+
+        self.roi_figure.figure.colorbar(roi_plot, ax=axis, fraction=0.04, pad=0.035,
+                                        label="cd/m^2")
+
+    def update_image_with_roi_plot(self, figure, image):
+        figure.figure.clf()
+
+        roi_axs = figure.figure.subplots(len(self.rois))
+        if len(self.rois) == 1:
+            self.plot_image_with_roi(roi_axs, image[0], self.rois[0])
+        elif len(self.rois) > 1:
+            for i in range(len(self.rois)):
+                self.plot_image_with_roi(roi_axs[i], image[i], self.rois[i])
+
+        figure.draw()
+
     def on_calculate_dugr_click(self):
         if len(self.rois) == 0:
             self.status_bar.showMessage("No ROI found! Make sure to safe a ROI before executing the calculation")
@@ -717,80 +747,8 @@ class ProjectiveDistUi(QWidget):
 
         self.df = pd.DataFrame(data)
 
-        self.filtered_image_figure.figure.clf()
-        self._filtered_image_ax = self.filtered_image_figure.figure.subplots(len(self.filtered_image))
-
-        if len(self.filtered_image) == 1:
-            self.filtered_image_plot = self._filtered_image_ax.imshow(self.filtered_image[0],
-                                                                      norm=LogNorm(
-                                                                          vmin=self.vmin,
-                                                                          vmax=np.max(self.source_image)),
-                                                                      cmap=custom_colormap.ls_cmap)
-            self.filtered_image_figure.figure.colorbar(self.filtered_image_plot, ax=self._filtered_image_ax,
-                                                       fraction=0.04, pad=0.035, label="[cd/m^2]")
-            t = np.linspace(0, 2 * pi, 100)
-            self._filtered_image_ax.plot(self.rois[0].width / 2 + ceil(self.filter_width / 2) + (
-                    self.rois[0].width) / 2 * np.cos(t),
-                                         self.rois[0].height / 2 + ceil(self.filter_width / 2) + (
-                                                 self.rois[0].height) / 2 * np.sin(t),
-                                         color='red')
-
-        else:
-            for i in range(len(self.filtered_image)):
-                self.filtered_image_plot = self._filtered_image_ax[i].imshow(self.filtered_image[i],
-                                                                             norm=LogNorm(
-                                                                                vmin=self.vmin,
-                                                                                vmax=np.max(self.source_image)),
-                                                                             cmap=custom_colormap.ls_cmap)
-                self.filtered_image_figure.figure.colorbar(self.filtered_image_plot, ax=self._filtered_image_ax[i],
-                                                           fraction=0.04, pad=0.035, label="[cd/m^2]")
-
-                t = np.linspace(0, 2 * pi, 100)
-                self._filtered_image_ax[i].plot(self.rois[i].width / 2 + ceil(self.filter_width / 2) + (
-                    self.rois[i].width) / 2 * np.cos(t),
-                                             self.rois[i].height / 2 + ceil(self.filter_width / 2) + (
-                                                 self.rois[i].height) / 2 * np.sin(t),
-                                             color='red')
-
-        self.filtered_image_figure.draw()
-
-        self.binarized_image_figure.figure.clf()
-        self._binarized_image_ax = self.binarized_image_figure.figure.subplots(len(self.binarized_image))
-
-        if len(self.binarized_image) == 1:
-            self.binarized_image_plot = self._binarized_image_ax.imshow(self.binarized_image[0],
-                                                                        norm=LogNorm(
-                                                                            vmin=self.vmin,
-                                                                            vmax=np.max(self.source_image)),
-                                                                        cmap=custom_colormap.ls_cmap)
-            self.binarized_image_figure.figure.colorbar(self.binarized_image_plot, ax=self._binarized_image_ax,
-                                                        fraction=0.04, pad=0.035, label="[cd/m^2]")
-
-            t = np.linspace(0, 2 * pi, 100)
-            self._binarized_image_ax.plot(self.rois[0].width / 2 + ceil(self.filter_width / 2) + (
-                    self.rois[0].width) / 2 * np.cos(t),
-                                         self.rois[0].height / 2 + ceil(self.filter_width / 2) + (
-                                                 self.rois[0].height) / 2 * np.sin(t),
-                                         color='red')
-
-        else:
-            for i in range(len(self.binarized_image)):
-                self.binarized_image_plot = self._binarized_image_ax[i].imshow(self.binarized_image[i],
-                                                                               norm=LogNorm(
-                                                                                    vmin=self.vmin,
-                                                                                    vmax=np.max(self.source_image)),
-                                                                               cmap=custom_colormap.ls_cmap)
-                self.binarized_image_figure.figure.colorbar(self.binarized_image_plot, ax=self._binarized_image_ax[i],
-                                                            fraction=0.04, pad=0.035, label="[cd/m^2]")
-
-                t = np.linspace(0, 2 * pi, 100)
-                self._binarized_image_ax[i].plot(self.rois[i].width / 2 + ceil(self.filter_width / 2) + (
-                    self.rois[i].width) / 2 * np.cos(t),
-                                              self.rois[i].height / 2 + ceil(self.filter_width / 2) + (
-                                                  self.rois[i].height) / 2 * np.sin(t),
-                                              color='red')
-
-        self.binarized_image_figure.draw()
+        self.update_image_with_roi_plot(self.filtered_image_figure, self.filtered_image)
+        self.update_image_with_roi_plot(self.binarized_image_figure, self.binarized_image)
 
         self.result_figure.figure.clf()
         self._result_ax = self.result_figure.figure.subplots()
