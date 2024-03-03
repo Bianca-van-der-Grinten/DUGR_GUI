@@ -12,14 +12,17 @@ Functions to handle image processing steps of the DUGR calculation
 - Function that executes the calculation of the DUGR value on projective distorted images
 """
 import matplotlib.pyplot as plt
+import scipy.ndimage
 from matplotlib.colors import LogNorm
 import numpy as np
 from cv2 import getPerspectiveTransform, warpPerspective, filter2D
-from scipy.ndimage import correlate
+from scipy.ndimage import correlate, gaussian_filter
 from math import sqrt, atan2, atan, cos, tan, radians, degrees, exp, log, ceil
 
 
 def filter_image(image: np.ndarray, filter_width: float, sigma: float):
+    filter_radius = int((filter_width - 1) / 2)
+    return gaussian_filter(image, sigma, radius=filter_radius)
     """
     This function uses a translation of the MATLAB fspecial('gaussian',[shape],[sigma]) function to calculate a 2D
     gaussian mask (See: https://de.mathworks.com/help/images/ref/fspecial.html#d123e101030).
@@ -295,7 +298,8 @@ def execute_projective_dist_algorithm(src_image: np.ndarray, viewing_distance: f
 
     fwhm = ro_min/r_o * 10
     sigma = fwhm / 2.3548
-    filter_width = 2 * ceil(3 * sigma) + 1
+    filter_radius = ceil(3 * sigma)
+    filter_width = 2 * filter_radius + 1
 
     #  Calculate Theta and Phi Image
     theta, phi = cart2theta_phi(focal_length=focal_length, pixel_size=pixel_size, image=src_image, opt_x=opt_x,
