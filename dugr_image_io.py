@@ -86,12 +86,8 @@ def convert_ascii_image_to_numpy_array(image_file: str):
         print("The entered image file has to be of type *.txt")
         return np.empty((0, 0)), {}
 
-    with open(image_file, "r") as file_object:
-        pixel_values = file_object.read()
-        rows = len([pos for pos, char in enumerate(pixel_values) if char == "\n"])  # Find the number of rows
-        pixel_values = re.split('[ \t \n]', pixel_values)  # Split string of file into pixel values
-        pixel_values = pixel_values[:-1]  # Pop last element (empty string)
-        columns = int(len(pixel_values) / rows)  # Find the number of columns
+    with open(image_file, 'r') as file_object:
+        pixel_values = file_object.read().replace(',', '.').split('\n')[2:-1]
 
-    image_array = (np.array(pixel_values, dtype=np.float32)).reshape((rows, columns))
+    image_array = np.genfromtxt(pixel_values, dtype=np.float32, delimiter='\t')
     return image_array
