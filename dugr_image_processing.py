@@ -399,10 +399,11 @@ def execute_projective_dist_algorithm(src_image: np.ndarray, viewing_distance: f
     for i in range(len(rois)):
 
         if type(rois[i]).__name__ == 'TrapezoidRoi':
-            y_start = min(rois[i].roi_vertices[:, 1])
-            y_end = max(rois[i].roi_vertices[:, 1])
-            x_start = min(rois[i].roi_vertices[:, 0])
-            x_end = max(rois[i].roi_vertices[:, 0])
+            border_width = ceil(filter_width/2)
+            y_start = min(rois[i].roi_vertices[:, 1]) - border_width
+            y_end = max(rois[i].roi_vertices[:, 1]) + border_width
+            x_start = min(rois[i].roi_vertices[:, 0]) - border_width
+            x_end = max(rois[i].roi_vertices[:, 0]) + border_width
 
             y_array = np.arange(int(y_start), int(y_end), 1)
             x_array = np.arange(int(x_start), int(x_end), 1)
@@ -411,11 +412,16 @@ def execute_projective_dist_algorithm(src_image: np.ndarray, viewing_distance: f
             # https://math.stackexchange.com/questions/757591/how-to-determine-the-side-on-which-a-point-lies
             for y_roi, y_src in enumerate(y_array):
                 for x_roi, x_src in enumerate(x_array):
-                    if (check_point(x_src, y_src, rois[i].top_left[0], rois[i].bottom_left[0], rois[i].top_left[1],
+                    if ((check_point(x_src, y_src, rois[i].top_left[0], rois[i].bottom_left[0], rois[i].top_left[1],
                                     rois[i].bottom_left[1]) <= 0) and (check_point(x_src, y_src, rois[i].top_right[0],
                                                                                    rois[i].bottom_right[0],
                                                                                    rois[i].top_right[1],
-                                                                                   rois[i].bottom_right[1]) >= 0):
+                                                                                   rois[i].bottom_right[1]) >= 0)
+                            and (check_point(x_src, y_src, rois[i].top_left[0], rois[i].top_right[0],rois[i].top_left[1],
+                                             rois[i].top_right[1]) >= 0)
+                            and (check_point(x_src, y_src, rois[i].bottom_left[0], rois[i].bottom_right[0],
+                                             rois[i].bottom_left[1], rois[i].bottom_right[1]) < 0)):
+
                         l_values.append(src_image[y_src][x_src])
                         omega_values.append(omega[y_src][x_src])
 
