@@ -12,6 +12,8 @@ from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
 )
+import sys
+import traceback
 
 basedir = dirname(__file__)
 
@@ -45,4 +47,11 @@ if __name__ == '__main__':
     app = QApplication(argv)
     app.setStyle('Fusion')
     window = MainWindow()
+
+    def excepthook(exc_type, exc_value, exc_tb):
+        tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+        print("error catched!:")
+        print("error message:\n", tb)
+
+    sys.excepthook = excepthook
     exit(app.exec())
