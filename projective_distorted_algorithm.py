@@ -7,6 +7,7 @@ import pandas as pd
 import dugr_image_io
 import dugr_image_processing
 import custom_colormap
+import pickle
 
 from roi_definitions import RectangularRoi, CircularRoi, TrapezoidRoi
 from os.path import exists
@@ -764,12 +765,28 @@ class ProjectiveDistUi(QWidget):
 
         protocol_file = QFileDialog.getSaveFileName(self, "Export File", "", "*.pdf")[0]
         if protocol_file:
-            pdf = PdfPages(protocol_file)
-            pdf.savefig(self.source_figure.figure)
-            pdf.savefig(self.filtered_image_figure.figure)
-            pdf.savefig(self.binarized_image_figure.figure)
-            pdf.savefig(self.result_figure.figure)
-            pdf.close()
+            self.generate_pdf(protocol_file, [self.source_figure.figure, self.filtered_image_figure.figure,
+                                                self.binarized_image_figure.figure, self.result_figure.figure])
+            self.df.to_json(protocol_file)
+            self.status_bar.showMessage('Export to *.pdf File successful')
+
+    def generate_pdf(self, filename, figures):
+        pdf = PdfPages(filename)
+        for fig in figures:
+            fig2 = pickle.loads(pickle.dumps(fig))
+            pdf.savefig(fig2)
+        pdf.close()
+
+#     def on_export_protocol_click(self):
+
+#        protocol_file = QFileDialog.getSaveFileName(self, "Export File", "", "*.pdf")[0]
+ #       if protocol_file:
+  #          pdf = PdfPages(protocol_file)
+   #         pdf.savefig(self.source_figure.figure)
+    #        pdf.savefig(self.filtered_image_figure.figure)
+     #       pdf.savefig(self.binarized_image_figure.figure)
+      #      pdf.savefig(self.result_figure.figure)
+       #     pdf.close()
 
     def on_export_to_json_click(self):
         json_file = QFileDialog.getSaveFileName(self, "Export File", "", "*.json")[0]
