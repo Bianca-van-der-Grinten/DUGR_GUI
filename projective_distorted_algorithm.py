@@ -766,27 +766,18 @@ class ProjectiveDistUi(QWidget):
         protocol_file = QFileDialog.getSaveFileName(self, "Export File", "", "*.pdf")[0]
         if protocol_file:
             self.generate_pdf(protocol_file, [self.source_figure.figure, self.filtered_image_figure.figure,
-                                                self.binarized_image_figure.figure, self.result_figure.figure])
-            self.df.to_json(protocol_file)
-            self.status_bar.showMessage('Export to *.pdf File successful')
+                                              self.binarized_image_figure.figure, self.result_figure.figure])
 
     def generate_pdf(self, filename, figures):
         pdf = PdfPages(filename)
+
         for fig in figures:
+            # FigureCanvasPdf (used by PdfPages) modifies the figure object so that it is not usable by the GUI
+            # anymore. Temporarily copying of the figure object is the solution but deepcopy is not supports.
+            # As workaround for deepcopy, pickle is used.
             fig2 = pickle.loads(pickle.dumps(fig))
             pdf.savefig(fig2)
         pdf.close()
-
-#     def on_export_protocol_click(self):
-
-#        protocol_file = QFileDialog.getSaveFileName(self, "Export File", "", "*.pdf")[0]
- #       if protocol_file:
-  #          pdf = PdfPages(protocol_file)
-   #         pdf.savefig(self.source_figure.figure)
-    #        pdf.savefig(self.filtered_image_figure.figure)
-     #       pdf.savefig(self.binarized_image_figure.figure)
-      #      pdf.savefig(self.result_figure.figure)
-       #     pdf.close()
 
     def on_export_to_json_click(self):
         json_file = QFileDialog.getSaveFileName(self, "Export File", "", "*.json")[0]
